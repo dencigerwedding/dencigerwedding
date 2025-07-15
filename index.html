@@ -1,0 +1,134 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Miriam & Yechiel – Wedding RSVP</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #fff8f0;
+      color: #333;
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
+    }
+    .rtl { direction: rtl; unicode-bidi: embed; }
+    h1, h2 { text-align: center; color: #8b4e32; }
+    label, p { display: block; margin-top: 15px; }
+    input, textarea, select, button {
+      width: 100%; padding: 10px; margin-top: 5px;
+      border-radius: 6px; border: 1px solid #ccc;
+    }
+    button { background-color: #8b4e32; color: #fff; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div style="text-align:center; margin-bottom:20px;">
+    <label for="lang">Language: </label>
+    <select id="lang">
+      <option value="en">English</option>
+      <option value="he">עברית</option>
+    </select>
+  </div>
+
+  <div id="content">
+    <!-- content gets inserted here -->
+  </div>
+
+  <script>
+    const texts = {
+      en: {
+        dir: "ltr",
+        html: `
+          <h1>Miriam & Yechiel</h1>
+          <h2>August 21 – Tiferes Elka, Monsey, NY</h2>
+          <p>We are so excited to celebrate with you! Please let us know if you'll be joining us for this special occasion.</p>
+          <p><strong>Location:</strong> Tiferes Elka, 2 School Terrace, Monsey, NY 10952</p>
+          <form id="rsvp-form">
+            <label for="name">Your Full Name</label>
+            <input type="text" id="name" name="name" required />
+            <label for="attendance">Will you be joining us?</label>
+            <select id="attendance" name="attendance" required>
+              <option value="">Select an option</option>
+              <option value="Yes">Yes, I/we will join</option>
+              <option value="No">Sorry, we can't make it</option>
+            </select>
+            <div id="guests-field" style="display:none;">
+              <label for="guests">How many will be joining?</label>
+              <input type="number" id="guests" name="guests" min="1" />
+            </div>
+            <label for="message">Leave a blessing, question or message</label>
+            <textarea id="message" name="message" rows="4"></textarea>
+            <button type="submit">Send RSVP</button>
+          </form>
+          <div id="thank-you" style="display:none; margin-top:20px; text-align:center; color:green;">
+            Thank you! Your response has been sent.
+          </div>`
+      },
+      he: {
+        dir: "rtl",
+        html: `
+          <h1 class="rtl">מרים ויחיאל</h1>
+          <h2 class="rtl">21 באוגוסט – תפארת אלקה, מונסי</h2>
+          <p class="rtl">אנחנו נרגשים לחגוג איתך! אנא אשרו האם תוכלו להשתתף באירוע.</p>
+          <p class="rtl"><strong>כתובת:</strong> תפארת אלקה, 2 סקול טראס, מונסי, ניו יורק 10952</p>
+          <form id="rsvp-form" class="rtl">
+            <label for="name">שם מלא</label>
+            <input type="text" id="name" name="name" required />
+            <label for="attendance">האם תשתתפו?</label>
+            <select id="attendance" name="attendance" required>
+              <option value="">בחרו אפשרות</option>
+              <option value="Yes">כן, נשתתף</option>
+              <option value="No">מצטערים, לא נוכל להגיע</option>
+            </select>
+            <div id="guests-field" style="display:none;">
+              <label for="guests">כמה משתתפים?</label>
+              <input type="number" id="guests" name="guests" min="1" />
+            </div>
+            <label for="message">השאירו ברכה, שאלה או הערה</label>
+            <textarea id="message" name="message" rows="4"></textarea>
+            <button type="submit">שליחת RSVP</button>
+          </form>
+          <div id="thank-you" style="display:none; margin-top:20px; text-align:center; color:green;">
+            תודה! תשובתכם הגיעה.
+          </div>`
+      }
+    };
+
+    const contentDiv = document.getElementById('content');
+    const langSelect = document.getElementById('lang');
+
+    function loadLang(lang) {
+      contentDiv.innerHTML = texts[lang].html;
+      document.body.dir = texts[lang].dir;
+
+      const attendance = document.getElementById('attendance');
+      attendance.addEventListener('change', () => {
+        document.getElementById('guests-field').style.display = attendance.value === 'Yes' ? 'block' : 'none';
+      });
+
+      document.getElementById('rsvp-form').addEventListener('submit', e => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        fetch('https://formspree.io/f/mwkgrrzv', {
+          method: 'POST',
+          headers: { 'Accept': 'application/json' },
+          body: formData
+        }).then(res => {
+          if (res.ok) {
+            e.target.reset();
+            document.getElementById('thank-you').style.display = 'block';
+          } else {
+            alert('Error sending RSVP');
+          }
+        });
+      });
+    }
+
+    langSelect.addEventListener('change', () => loadLang(langSelect.value));
+    loadLang('en');
+  </script>
+</body>
+</html>
